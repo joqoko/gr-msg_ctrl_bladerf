@@ -1,0 +1,11 @@
+This is the msg_ctrl_bladerf-write-a-block package meant as a guide to building
+out-of-tree packages. To use the msg_ctrl_bladerf blocks, the Python namespaces
+is in 'msg_ctrl_bladerf', which is imported as:
+
+    import msg_ctrl_bladerf
+
+See the Doxygen documentation for details about the blocks available
+in this package. A quick listing of the details can be found in Python
+after importing by using:
+
+    help(msg_ctrl_bladerf)
