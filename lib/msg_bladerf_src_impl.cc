@@ -13,20 +13,21 @@ namespace gr {
 
     using output_type = gr_complex;
     msg_bladerf_src::sptr
-    msg_bladerf_src::make(uint32_t samp_rate, uint64_t freq, uint32_t bw, int32_t gain0, int32_t gm0, int32_t gain1, int32_t gm1, int32_t biastee_rx, int32_t external_ref, int32_t external_freq, int32_t verbose)
+    msg_bladerf_src::make(uint32_t samp_rate, uint64_t freq, uint32_t bw, int32_t gain0, int32_t gm0, int32_t gain1, int32_t gm1, int32_t biastee_rx, int32_t external_ref, int32_t external_freq, int32_t verbose, int display_level)
     {
       return gnuradio::make_block_sptr<msg_bladerf_src_impl>(
-        samp_rate, freq, bw, gain0, gm0, gain1, gm1, biastee_rx, external_ref, external_freq, verbose);
+        samp_rate, freq, bw, gain0, gm0, gain1, gm1, biastee_rx, external_ref, external_freq, verbose, display_level);
     }
 
 
     /*
      * The private constructor
      */
-    msg_bladerf_src_impl::msg_bladerf_src_impl(uint32_t samp_rate, uint64_t freq, uint32_t bw, int32_t gain0, int32_t gm0, int32_t gain1, int32_t gm1, int32_t biastee_rx, int32_t external_ref, int32_t external_freq, int32_t verbose)
+    msg_bladerf_src_impl::msg_bladerf_src_impl(uint32_t samp_rate, uint64_t freq, uint32_t bw, int32_t gain0, int32_t gm0, int32_t gain1, int32_t gm1, int32_t biastee_rx, int32_t external_ref, int32_t external_freq, int32_t verbose, int display_level)
       : gr::sync_block("msg_bladerf_src",
               gr::io_signature::make(0, 0, 0),
-              gr::io_signature::make(2, 2, sizeof(output_type)))
+              gr::io_signature::make(2, 2, sizeof(output_type))),
+      d_display_level(display_level)
     {
       if (verbose != 0) {
           bladerf_log_set_verbosity(BLADERF_LOG_LEVEL_VERBOSE);
@@ -284,6 +285,7 @@ namespace gr {
       set_max_noutput_items(SAMPLES_PER_BUFFER);
       set_output_multiple(2);
       // message_port_register_out(pmt::mp("status"));
+      message_port_register_out(pmt::mp("config_out"));
       message_port_register_in(pmt::mp("config_in"));
       set_msg_handler(pmt::mp("config_in"),
         [this](const pmt::pmt_t& msg) { reconfig(msg); });
@@ -316,6 +318,7 @@ namespace gr {
 
     void msg_bladerf_src_impl::reconfig(pmt::pmt_t msg)
     {
+      bool reconfigured = false;
       // here we reconfig recevier according to different command
       if(pmt::dict_has_key(msg, pmt::string_to_symbol("cmd")) && pmt::dict_has_key(msg, pmt::string_to_symbol("value")))
       {
@@ -328,6 +331,7 @@ namespace gr {
           {
             std::cout << "block::msg_balderf_src: new center_frequency is set to [" << freq << "]" << std::endl;
           }
+          reconfigured = true;
         }
         else if(cmd.compare("external_ref") == 0)
         {
@@ -337,6 +341,7 @@ namespace gr {
           {
             std::cout << "block::msg_balderf_src: new external_ref is set to [" << external_ref << "]" << std::endl;
           }
+          reconfigured = true;
         }
         else if(cmd.compare("gain") == 0)
         {
@@ -350,6 +355,7 @@ namespace gr {
             {
               std::cout << "block::msg_balderf_src: new gain at channel [" << channel << "] is set to [" << gain << "]" << std::endl;
             }
+            reconfigured = true;
           }
           else
           {
@@ -364,6 +370,7 @@ namespace gr {
           {
             std::cout << "block::msg_balderf_src: new biastee is set to [" << enable << "]" << std::endl;
           }
+          reconfigured = true;
         }
         else if(cmd.compare("gainmode") == 0)
         {
@@ -377,6 +384,7 @@ namespace gr {
             {
               std::cout << "block::msg_balderf_src: new gain mode at channel [" << channel << "] is set to [" << gainmode << "]" << std::endl;
             }
+            reconfigured = true;
           }
           else
           {
@@ -391,11 +399,17 @@ namespace gr {
           {
             std::cout << "block::msg_balderf_src: new bandwidth is set to [" << bw << "]" << std::endl;
           }
+          reconfigured = true;
         }
         else
         {
           std::cout << "WARNING - block::msg_balderf_src: unknown cmd type. nothing will be changed. please check" << std::endl;
         }
+        if(reconfigured)
+        {
+          message_port_pub(pmt::mp("config_out"), msg);
+        }
+        
       }
       else
       {

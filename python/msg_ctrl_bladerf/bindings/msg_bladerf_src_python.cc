@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(msg_bladerf_src.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(01e2e45f47d813f432ea01fd1e6a5063)                     */
+/* BINDTOOL_HEADER_FILE_HASH(782fb51f16d37c412ea8ecd5f0e3eb6d)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -30,18 +30,74 @@ namespace py = pybind11;
 void bind_msg_bladerf_src(py::module& m)
 {
 
-    using msg_bladerf_src    = gr::msg_ctrl_bladerf::msg_bladerf_src;
+    using msg_bladerf_src    = ::gr::msg_ctrl_bladerf::msg_bladerf_src;
 
 
     py::class_<msg_bladerf_src, gr::sync_block, gr::block, gr::basic_block,
         std::shared_ptr<msg_bladerf_src>>(m, "msg_bladerf_src", D(msg_bladerf_src))
 
         .def(py::init(&msg_bladerf_src::make),
+           py::arg("samp_rate"),
+           py::arg("freq"),
+           py::arg("bw"),
+           py::arg("gain0"),
+           py::arg("gm0"),
+           py::arg("gain1"),
+           py::arg("gm1"),
+           py::arg("biastee_rx"),
+           py::arg("external_ref"),
+           py::arg("external_freq"),
+           py::arg("verbose"),
+           py::arg("display_level"),
            D(msg_bladerf_src,make)
         )
         
 
 
+
+
+        
+        .def("set_freq",&msg_bladerf_src::set_freq,       
+            py::arg("freq"),
+            D(msg_bladerf_src,set_freq)
+        )
+
+
+        
+        .def("set_gain",&msg_bladerf_src::set_gain,       
+            py::arg("gain"),
+            py::arg("channel"),
+            D(msg_bladerf_src,set_gain)
+        )
+
+
+        
+        .def("set_gainmode",&msg_bladerf_src::set_gainmode,       
+            py::arg("gainmode"),
+            py::arg("channel"),
+            D(msg_bladerf_src,set_gainmode)
+        )
+
+
+        
+        .def("set_biastee",&msg_bladerf_src::set_biastee,       
+            py::arg("enable"),
+            D(msg_bladerf_src,set_biastee)
+        )
+
+
+        
+        .def("set_bw",&msg_bladerf_src::set_bw,       
+            py::arg("bw"),
+            D(msg_bladerf_src,set_bw)
+        )
+
+
+        
+        .def("set_external_ref",&msg_bladerf_src::set_external_ref,       
+            py::arg("external_ref"),
+            D(msg_bladerf_src,set_external_ref)
+        )
 
         ;
 

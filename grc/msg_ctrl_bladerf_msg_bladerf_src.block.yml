@@ -4,7 +4,8 @@ category: '[msg_ctrl_bladerf]'
 
 templates:
   imports: from gnuradio import msg_ctrl_bladerf
-  make: msg_ctrl_bladerf.msg_bladerf_src(${samp_rate}, ${freq}, ${bw}, ${gain0}, ${gm0}, ${gain1}, ${gm1}, ${biastee_rx}, ${external_ref}, ${external_freq}, ${verbose})
+  make: msg_ctrl_bladerf.msg_bladerf_src(${samp_rate}, ${freq}, ${bw}, ${gain0}, ${gm0}, ${gain1}, ${gm1}, ${biastee_rx}, ${external_ref}, ${external_freq}, ${verbose}, ${display_level})
+
   callbacks:
   - set_freq(${freq})
   - set_bw(${bw})
@@ -59,6 +60,10 @@ parameters:
   label: Verbose
   dtype: int
   default: 0
+- id: display_level
+  label: Display level
+  dtype: int
+  default: 0
 
 inputs:
 - label: config_in
@@ -70,6 +75,9 @@ outputs:
   domain: stream
   dtype: complex
   multiplicity: 2
+- label: config_out
+  domain: message
+  optional: true
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.

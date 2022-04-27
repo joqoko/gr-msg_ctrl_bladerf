@@ -32,7 +32,15 @@ namespace gr {
        * class. msg_ctrl_bladerf::msg_bladerf_src::make is the public interface for
        * creating new instances.
        */
-      static sptr make(uint32_t samp_rate, uint64_t freq, uint32_t bw, int32_t gain0, int32_t gm0, int32_t gain1, int32_t gm1, int32_t biastee_rx, int32_t external_ref, int32_t external_freq, int32_t verbose);
+      static sptr make(uint32_t samp_rate, uint64_t freq, uint32_t bw, int32_t gain0, int32_t gm0, int32_t gain1, int32_t gm1, int32_t biastee_rx, int32_t external_ref, int32_t external_freq, int32_t verbose, int display_level);
+
+      virtual void set_freq(uint64_t freq) = 0;
+      virtual void set_gain(int32_t gain, int32_t channel) = 0;
+      virtual void set_gainmode(int32_t gainmode, int32_t channel) = 0;
+      virtual void set_biastee(int32_t enable) = 0;
+      virtual void set_bw(uint32_t bw) = 0;
+      virtual void set_external_ref(int32_t external_ref) = 0;
+
     };
 
   } // namespace msg_ctrl_bladerf

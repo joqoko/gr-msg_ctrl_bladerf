@@ -19,9 +19,30 @@
  static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src = R"doc()doc";
 
 
- static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_msg_bladerf_src = R"doc()doc";
+ static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_msg_bladerf_src_0 = R"doc()doc";
+
+
+ static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_msg_bladerf_src_1 = R"doc()doc";
 
 
  static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_make = R"doc()doc";
+
+
+ static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_set_freq = R"doc()doc";
+
+
+ static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_set_gain = R"doc()doc";
+
+
+ static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_set_gainmode = R"doc()doc";
+
+
+ static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_set_biastee = R"doc()doc";
+
+
+ static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_set_bw = R"doc()doc";
+
+
+ static const char *__doc_gr_msg_ctrl_bladerf_msg_bladerf_src_set_external_ref = R"doc()doc";
 
   

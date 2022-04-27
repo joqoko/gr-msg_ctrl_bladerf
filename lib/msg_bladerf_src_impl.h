@@ -34,6 +34,7 @@ namespace gr {
       } bladerf_config;
 
      private:
+      int d_display_level = 0;
       int d_channel;
       bool d_external_ref;
       int d_verbose;
@@ -60,7 +61,7 @@ namespace gr {
       bool _running;
 
      public:
-      msg_bladerf_src_impl(uint32_t samp_rate, uint64_t freq, uint32_t bw, int32_t gain0, int32_t gm0, int32_t gain1, int32_t gm1, int32_t biastee_rx, int32_t external_ref, int32_t external_freq, int32_t verbose);
+      msg_bladerf_src_impl(uint32_t samp_rate, uint64_t freq, uint32_t bw, int32_t gain0, int32_t gm0, int32_t gain1, int32_t gm1, int32_t biastee_rx, int32_t external_ref, int32_t external_freq, int32_t verbose, int display_level);
       ~msg_bladerf_src_impl();
 
       void set_freq(uint64_t freq);
