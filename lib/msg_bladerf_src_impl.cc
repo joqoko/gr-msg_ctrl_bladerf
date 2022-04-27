@@ -284,6 +284,9 @@ namespace gr {
       set_max_noutput_items(SAMPLES_PER_BUFFER);
       set_output_multiple(2);
       // message_port_register_out(pmt::mp("status"));
+      message_port_register_in(pmt::mp("config_in"));
+      set_msg_handler(pmt::mp("config_in"),
+        [this](const pmt::pmt_t& msg) { reconfig(msg); });
     }
     /*
      * Our virtual destructor.
@@ -309,6 +312,95 @@ namespace gr {
       bladerf_close(d_dev);
       volk_free(_16ibuf);
       volk_free(_32fcbuf);
+    }
+
+    void msg_bladerf_src_impl::reconfig(pmt::pmt_t msg)
+    {
+      // here we reconfig recevier according to different command
+      if(pmt::dict_has_key(msg, pmt::string_to_symbol("cmd")) && pmt::dict_has_key(msg, pmt::string_to_symbol("value")))
+      {
+        std::string cmd = pmt::symbol_to_string(pmt::dict_ref(msg, pmt::string_to_symbol("cmd"), pmt::PMT_NIL));
+        if(cmd.compare("freq") == 0)
+        {
+          uint64_t freq = pmt::to_long(pmt::dict_ref(msg, pmt::string_to_symbol("value"), pmt::PMT_NIL));
+          set_freq(freq);
+          if(d_display_level == 1)
+          {
+            std::cout << "block::msg_balderf_src: new center_frequency is set to [" << freq << "]" << std::endl;
+          }
+        }
+        else if(cmd.compare("external_ref") == 0)
+        {
+          int external_ref = pmt::to_long(pmt::dict_ref(msg, pmt::string_to_symbol("value"), pmt::PMT_NIL));
+          set_external_ref(external_ref);
+          if(d_display_level == 1)
+          {
+            std::cout << "block::msg_balderf_src: new external_ref is set to [" << external_ref << "]" << std::endl;
+          }
+        }
+        else if(cmd.compare("gain") == 0)
+        {
+          if(pmt::is_pair(pmt::dict_ref(msg, pmt::string_to_symbol("value"), pmt::PMT_NIL)))
+          {
+            pmt::pmt_t gain_setting = pmt::dict_ref(msg, pmt::string_to_symbol("value"), pmt::PMT_NIL);
+            int gain = pmt::to_long(pmt::car(gain_setting)); 
+            int channel = pmt::to_long(pmt::cdr(gain_setting)); 
+            set_gain(gain, channel);
+            if(d_display_level == 1)
+            {
+              std::cout << "block::msg_balderf_src: new gain at channel [" << channel << "] is set to [" << gain << "]" << std::endl;
+            }
+          }
+          else
+          {
+            std::cout << "WARNING - block::msg_balderf_src: unknown values for setting gain. nothing will be changed. please check" << std::endl;
+          }
+        }
+        else if(cmd.compare("biastee") == 0)
+        {
+          int enable = pmt::to_long(pmt::dict_ref(msg, pmt::string_to_symbol("biastee"), pmt::PMT_NIL));
+          set_biastee(enable);
+          if(d_display_level == 1)
+          {
+            std::cout << "block::msg_balderf_src: new biastee is set to [" << enable << "]" << std::endl;
+          }
+        }
+        else if(cmd.compare("gainmode") == 0)
+        {
+          if(pmt::is_pair(pmt::dict_ref(msg, pmt::string_to_symbol("value"), pmt::PMT_NIL)))
+          {
+            pmt::pmt_t gainmode_setting = pmt::dict_ref(msg, pmt::string_to_symbol("value"), pmt::PMT_NIL);
+            int gainmode = pmt::to_long(pmt::car(gainmode_setting)); 
+            int channel = pmt::to_long(pmt::cdr(gainmode_setting)); 
+            set_gainmode(gainmode, channel);
+            if(d_display_level == 1)
+            {
+              std::cout << "block::msg_balderf_src: new gain mode at channel [" << channel << "] is set to [" << gainmode << "]" << std::endl;
+            }
+          }
+          else
+          {
+            std::cout << "WARNING - block::msg_balderf_src: unknown values for setting gain. nothing will be changed. please check" << std::endl;
+          }
+        }
+        else if(cmd.compare("bw") == 0)
+        {
+          uint32_t bw = pmt::to_long(pmt::dict_ref(msg, pmt::string_to_symbol("value"), pmt::PMT_NIL));
+          set_bw(bw);
+          if(d_display_level == 1)
+          {
+            std::cout << "block::msg_balderf_src: new bandwidth is set to [" << bw << "]" << std::endl;
+          }
+        }
+        else
+        {
+          std::cout << "WARNING - block::msg_balderf_src: unknown cmd type. nothing will be changed. please check" << std::endl;
+        }
+      }
+      else
+      {
+        std::cout << "WARNING - block::msg_balderf_src: unknown msg input. nothing will be changed. please check" << std::endl;
+      }
     }
 
     void msg_bladerf_src_impl::set_freq(uint64_t freq)

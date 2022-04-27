@@ -69,6 +69,7 @@ namespace gr {
       void set_biastee(int32_t enable);
       void set_bw(uint32_t bw);
       void set_external_ref(int32_t external_ref);
+      void reconfig(pmt::pmt_t msg);
 
       // Where all the action really happens
       int work(

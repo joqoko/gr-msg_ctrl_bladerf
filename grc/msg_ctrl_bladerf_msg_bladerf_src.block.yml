@@ -14,6 +14,7 @@ templates:
   - set_gainmode(${gm1},1)
   - set_biastee(${biastee_rx})
   - set_external_ref(${external_ref})
+
 parameters:
 - id: samp_rate
   label: Sample rate
@@ -58,6 +59,12 @@ parameters:
   label: Verbose
   dtype: int
   default: 0
+
+inputs:
+- label: config_in
+  domain: message
+  optional: true
+
 outputs:
 - label: out
   domain: stream
