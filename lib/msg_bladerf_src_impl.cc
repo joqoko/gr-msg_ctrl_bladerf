@@ -26,7 +26,7 @@ namespace gr {
     msg_bladerf_src_impl::msg_bladerf_src_impl(uint32_t samp_rate, uint64_t freq, uint32_t bw, int32_t gain0, int32_t gm0, int32_t gain1, int32_t gm1, int32_t biastee_rx, int32_t external_ref, int32_t external_freq, int32_t verbose, int display_level)
       : gr::sync_block("msg_bladerf_src",
               gr::io_signature::make(0, 0, 0),
-              gr::io_signature::make(2, 2, sizeof(output_type))),
+              gr::io_signature::make(1, 1, sizeof(output_type))),
       d_display_level(display_level)
     {
       if (verbose != 0) {
@@ -156,12 +156,12 @@ namespace gr {
     
       d_conf = {
           .ch0 = BLADERF_CHANNEL_RX(0),
-          .ch1 = BLADERF_CHANNEL_RX(1),
+          // .ch1 = BLADERF_CHANNEL_RX(1),
           .freq = freq,
           .bw = bw,
           .fs = samp_rate,
           .gain0 = gain0,
-          .gain1 = gain1,
+          // .gain1 = gain1,
       };
     
       switch (gm0) {
@@ -183,6 +183,7 @@ namespace gr {
           break;
       }
     
+      /*
       switch (gm1) {
       case 0:
           d_conf.gainmode1 = BLADERF_GAIN_MGC;
@@ -201,6 +202,7 @@ namespace gr {
           exit(0);
           break;
       }
+      */
     
       if (biastee_rx) {
           d_conf.biastee_rx = true;
@@ -216,7 +218,8 @@ namespace gr {
       Block settings
       */
       set_max_noutput_items(SAMPLES_PER_BUFFER);
-      set_output_multiple(2);
+      // set_output_multiple(2);
+      set_output_multiple(1);
     
       size_t alignment = volk_get_alignment();
     
@@ -259,11 +262,13 @@ namespace gr {
       }
     
       /* Enable RX 1 */
+      /*
       status = bladerf_enable_module(d_dev, d_conf.ch1, true);
       if (status < 0) {
           fprintf(stderr, "Couldn't enable RX module: %s\n", bladerf_strerror(status));
           exit(-1);
       }
+      */
       // status = bladerf_set_rx_mux(d_dev,BLADERF_RX_MUX_12BIT_COUNTER);
       status = bladerf_set_rx_mux(d_dev, BLADERF_RX_MUX_BASEBAND);
       if (status < 0) {
@@ -274,8 +279,8 @@ namespace gr {
       set_freq(d_conf.freq);
       set_gainmode(gm0, 0);
       set_gain(d_conf.gain0, 0);
-      set_gainmode(gm1, 1);
-      set_gain(d_conf.gain1, 1);
+      // set_gainmode(gm1, 1);
+      // set_gain(d_conf.gain1, 1);
       set_bw(d_conf.bw);
     
       /*
@@ -283,7 +288,8 @@ namespace gr {
       int const alignment_multiple = volk_get_alignment() / sizeof(gr_complex);
       set_alignment(std::max(1, alignment_multiple));
       set_max_noutput_items(SAMPLES_PER_BUFFER);
-      set_output_multiple(2);
+      // set_output_multiple(2);
+      set_output_multiple(1);
       // message_port_register_out(pmt::mp("status"));
       message_port_register_out(pmt::mp("config_out"));
       message_port_register_in(pmt::mp("config_in"));
@@ -305,11 +311,13 @@ namespace gr {
       }
     
       /* Enable RX 1 */
+      /*
       status = bladerf_enable_module(d_dev, d_conf.ch1, false);
       if (status < 0) {
           fprintf(stderr, "Couldn't disable RX module: %s\n", bladerf_strerror(status));
           exit(-1);
       }
+      */
     
       bladerf_close(d_dev);
       volk_free(_16ibuf);
@@ -484,13 +492,6 @@ namespace gr {
               fprintf(stderr, "Failed to set gain: %s\n", bladerf_strerror(status));
               exit(0);
           }
-      } else if (channel == 1) {
-          d_conf.gain1 = gain;
-          status = bladerf_set_gain(d_dev, d_conf.ch1, d_conf.gain1);
-          if (status != 0) {
-              fprintf(stderr, "Failed to set gain: %s\n", bladerf_strerror(status));
-              exit(0);
-          }
       } else {
           fprintf(stderr, "set_gain() invalid channel: %d\n", channel);
           exit(0);
@@ -557,16 +558,16 @@ namespace gr {
               exit(0);
           }
           break;
-      case 1:
-          d_conf.gainmode1 = gm;
-          status = bladerf_set_gain_mode(d_dev, d_conf.ch1, d_conf.gainmode1);
-          if (status != 0) {
-              fprintf(stderr,
-                      "Failed to set default gain mode: %s\n",
-                      bladerf_strerror(status));
-              exit(0);
-          }
-          break;
+      //case 1:
+       //   d_conf.gainmode1 = gm;
+        //  status = bladerf_set_gain_mode(d_dev, d_conf.ch1, d_conf.gainmode1);
+         // if (status != 0) {
+          //    fprintf(stderr,
+          //            "Failed to set default gain mode: %s\n",
+          //            bladerf_strerror(status));
+          //    exit(0);
+         // }
+         // break;
       default:
           fprintf(stderr, "set_gainmode() invalid channel: %d\n", channel);
           exit(0);
@@ -642,7 +643,7 @@ namespace gr {
         gr_vector_void_star &output_items)
     {
       int status;
-      size_t nstreams = 2;
+      size_t nstreams = 1;
     
       gr::thread::scoped_lock guard(d_mutex);
     
@@ -667,17 +668,8 @@ namespace gr {
       volk_16i_s32f_convert_32f(
           reinterpret_cast<float*>(_32fcbuf), _16ibuf, SCALING_FACTOR, 2 * noutput_items);
     
-      // Deinterleave
-      // gr_complex *out1 = (gr_complex *) output_items[0];
-      // gr_complex *out2 = (gr_complex *) output_items[1];
-      auto out0 = static_cast<output_type*>(output_items[0]);
-      auto out1 = static_cast<output_type*>(output_items[1]);
-      int k = 0;
-      for (uint32_t i = 0; i < noutput_items / nstreams; i++) {
-          out0[i] = _32fcbuf[k];
-          out1[i] = _32fcbuf[k + 1];
-          k += 2;
-      }
+      gr_complex **out = reinterpret_cast<gr_complex **>(&output_items[0]);
+      memcpy(out[0], _32fcbuf, sizeof(gr_complex) * noutput_items);
       /*
       //Deinterleave alternative (identical performance)
       gr_complex **out = reinterpret_cast<gr_complex **>(&output_items[0]);
